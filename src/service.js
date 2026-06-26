@@ -35,8 +35,29 @@ async function analyzeChannel(channelInput, options = {}) {
   const maxAudioTranscriptions = clamp(Number(options.maxAudioTranscriptions ?? 500), 0, 500);
   let audioTranscriptionsUsed = 0;
   const videos = [];
+  const totalVideos = report.videos.length;
 
-  for (const video of report.videos) {
+  if (options.onProgress) {
+    options.onProgress({
+      phase: "videos",
+      processed: 0,
+      total: totalVideos,
+      message: `Coleta preparada: ${totalVideos} videos para analisar.`,
+    });
+  }
+
+  for (let index = 0; index < report.videos.length; index += 1) {
+    const video = report.videos[index];
+    if (options.onProgress) {
+      options.onProgress({
+        phase: includeTranscripts ? "transcription" : "summary",
+        processed: index,
+        total: totalVideos,
+        currentTitle: video.title,
+        message: `Processando ${index + 1}/${totalVideos}: ${video.title}`,
+      });
+    }
+
     const audioAllowed =
       Boolean(options.audioFallback) &&
       audioTranscriptionsUsed < maxAudioTranscriptions;
@@ -68,6 +89,16 @@ async function analyzeChannel(channelInput, options = {}) {
       transcript,
       summary,
     });
+
+    if (options.onProgress) {
+      options.onProgress({
+        phase: "videos",
+        processed: index + 1,
+        total: totalVideos,
+        currentTitle: video.title,
+        message: `Concluido ${index + 1}/${totalVideos}: ${video.title}`,
+      });
+    }
   }
 
   for (const item of videos) {

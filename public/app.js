@@ -97,12 +97,7 @@ form.addEventListener("submit", async (event) => {
       audioFallback: "true",
       maxAudioTranscriptions,
     });
-    const endpoint = `/api/channel?${params}`;
-    const { response, payload } = await fetchJsonWithResponse(endpoint);
-
-    if (!response.ok) {
-      throw new Error(payload.error || "Falha ao analisar canal.");
-    }
+    const payload = await runChannelJob(params);
 
     setProgressStep(4);
     currentReport = payload;
@@ -162,6 +157,44 @@ function validateYearRange(yearFrom, yearTo) {
   }
 
   return "";
+}
+
+async function runChannelJob(params) {
+  const { response, payload } = await fetchJsonWithResponse(`/api/channel/start?${params}`);
+  if (!response.ok) {
+    throw new Error(payload.error || "Falha ao iniciar coleta.");
+  }
+
+  const jobId = payload.jobId;
+  if (!jobId) {
+    throw new Error("Servidor nao retornou jobId para acompanhar a coleta.");
+  }
+
+  while (true) {
+    await delay(5000);
+    const job = await fetchJson(`/api/channel/job?id=${encodeURIComponent(jobId)}`);
+
+    if (job.progress?.message) {
+      setStatus(job.progress.message);
+    }
+
+    if (job.progress?.total) {
+      const processed = job.progress.processed || 0;
+      setStatus(`${job.progress.message} (${processed}/${job.progress.total})`);
+    }
+
+    if (job.status === "done") {
+      return job.result;
+    }
+
+    if (job.status === "failed") {
+      throw new Error(job.error || "Coleta falhou em background.");
+    }
+  }
+}
+
+function delay(ms) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
 document.querySelector("#export-jsonl").addEventListener("click", () => {
