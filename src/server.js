@@ -76,6 +76,11 @@ async function handleRequest(request, response) {
         hasYouTubeApiKey: Boolean(process.env.YOUTUBE_API_KEY),
         hasOpenAiApiKey: Boolean(process.env.OPENAI_API_KEY),
         hasGroqApiKey: Boolean(process.env.GROQ_API_KEY),
+        hasYouTubeCookies: Boolean(
+          process.env.YOUTUBE_COOKIES_BASE64 ||
+            process.env.YOUTUBE_COOKIES ||
+            process.env.YOUTUBE_COOKIES_PATH,
+        ),
         canUseAudioTranscription: canUseAudioTranscription(),
         envLoaded: Boolean(getLoadedEnvPath()),
       });
