@@ -59,9 +59,22 @@ Este projeto usa Docker no Render para garantir `ffmpeg` e `yt-dlp` no ambiente 
 4. Preencha os secrets solicitados:
    - `YOUTUBE_API_KEY`
    - `GROQ_API_KEY`
+   - `YOUTUBE_COOKIES_BASE64` quando o YouTube bloquear o download de audio no Render
 5. Aplique o Blueprint e monitore o deploy.
 
 O servico usa `/health` como health check. As variaveis de audio ficam no `render.yaml` com padroes de arquivo pequeno: MP3 mono, 16 kHz e 32 kbps.
+
+### Cookies do YouTube no Render
+
+Em servidores de datacenter, o YouTube pode bloquear `yt-dlp` com `HTTP 429` ou "Sign in to confirm you're not a bot". Quando isso acontecer, exporte cookies do YouTube em formato Netscape `cookies.txt`, converta para base64 e preencha `YOUTUBE_COOKIES_BASE64` no Render.
+
+No Windows PowerShell:
+
+```powershell
+[Convert]::ToBase64String([IO.File]::ReadAllBytes("C:\caminho\cookies.txt"))
+```
+
+Cole o resultado como secret `YOUTUBE_COOKIES_BASE64`.
 
 Observacao: transcricoes longas podem demorar porque o app baixa o audio, compacta, divide em partes quando necessario e transcreve tudo antes de responder. Se isso ficar pesado em producao, o proximo refinamento natural e separar a transcricao em worker/background job.
 

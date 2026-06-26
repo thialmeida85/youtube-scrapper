@@ -1,7 +1,8 @@
 FROM node:20-bookworm-slim
 
 RUN apt-get update \
-  && apt-get install -y --no-install-recommends ca-certificates curl ffmpeg python3 \
+  && apt-get install -y --no-install-recommends ca-certificates curl ffmpeg python3 unzip \
+  && DENO_INSTALL=/usr/local curl -fsSL https://deno.land/install.sh | sh \
   && curl -L https://github.com/yt-dlp/yt-dlp/releases/latest/download/yt-dlp -o /usr/local/bin/yt-dlp \
   && chmod +x /usr/local/bin/yt-dlp \
   && apt-get clean \

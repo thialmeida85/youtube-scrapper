@@ -39,23 +39,40 @@ async function transcribeVideoAudio(video, options = {}) {
   const outputTemplate = path.join(workDir, `${video.id}.%(ext)s`);
   const audioPath = path.join(workDir, `${video.id}.mp3`);
   const compactAudioPath = path.join(workDir, `${video.id}.compact.mp3`);
+  const cookiePath = writeCookieFile(workDir);
+  const ytDlpArgs = [
+    "--no-playlist",
+    "--format",
+    "worstaudio/worst",
+    "--extract-audio",
+    "--audio-format",
+    "mp3",
+    "--audio-quality",
+    "9",
+    "--sleep-requests",
+    "1",
+    "--sleep-interval",
+    "1",
+    "--max-sleep-interval",
+    "3",
+    "--ffmpeg-location",
+    path.dirname(ffmpegPath),
+    "--output",
+    outputTemplate,
+    video.url,
+  ];
+  const denoPath = findExecutable("deno");
+
+  if (denoPath) {
+    ytDlpArgs.splice(1, 0, "--js-runtimes", `deno:${denoPath}`);
+  }
+
+  if (cookiePath) {
+    ytDlpArgs.splice(1, 0, "--cookies", cookiePath);
+  }
 
   try {
-    await runCommand(ytDlpPath, [
-      "--no-playlist",
-      "--format",
-      "worstaudio/worst",
-      "--extract-audio",
-      "--audio-format",
-      "mp3",
-      "--audio-quality",
-      "9",
-      "--ffmpeg-location",
-      path.dirname(ffmpegPath),
-      "--output",
-      outputTemplate,
-      video.url,
-    ], AUDIO_COMMAND_TIMEOUT_MS);
+    await runCommand(ytDlpPath, ytDlpArgs, AUDIO_COMMAND_TIMEOUT_MS);
 
     if (!fs.existsSync(audioPath)) {
       return unavailable("Audio nao foi gerado pelo yt-dlp.");
@@ -259,6 +276,26 @@ function unavailable(note) {
     segments: [],
     note,
   };
+}
+
+function writeCookieFile(workDir) {
+  if (process.env.YOUTUBE_COOKIES_PATH && fs.existsSync(process.env.YOUTUBE_COOKIES_PATH)) {
+    return process.env.YOUTUBE_COOKIES_PATH;
+  }
+
+  const encodedCookies = process.env.YOUTUBE_COOKIES_BASE64;
+  const rawCookies = process.env.YOUTUBE_COOKIES;
+  const value = encodedCookies
+    ? Buffer.from(encodedCookies, "base64").toString("utf8")
+    : rawCookies || "";
+
+  if (!value.trim()) {
+    return null;
+  }
+
+  const cookiePath = path.join(workDir, "youtube-cookies.txt");
+  fs.writeFileSync(cookiePath, value, "utf8");
+  return cookiePath;
 }
 
 function findExecutable(name) {
