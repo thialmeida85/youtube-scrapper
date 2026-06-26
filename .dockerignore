@@ -1,0 +1,10 @@
+.env
+.git
+.agents
+dist
+node_modules
+npm-debug.log
+*.pdf
+*.doc
+*.csv
+*.jsonl

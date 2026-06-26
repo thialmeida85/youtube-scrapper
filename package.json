@@ -1,0 +1,28 @@
+{
+  "name": "youtube-scraper",
+  "version": "0.1.0",
+  "description": "Extrai metadados, transcricao e resumo de videos do YouTube.",
+  "main": "src/server.js",
+  "bin": {
+    "youtube-scraper": "src/server.js"
+  },
+  "scripts": {
+    "start": "node src/server.js",
+    "cli": "node src/cli.js",
+    "build": "npm run check && pkg .",
+    "check": "node --check src/server.js && node --check src/cli.js && node --check src/service.js && node --check src/youtube.js && node --check src/transcript.js && node --check src/audioTranscriber.js && node --check src/summarizer.js && node --check src/speechAnalysis.js && node --check src/config.js && node --check src/warnings.js && node --check public/app.js"
+  },
+  "pkg": {
+    "scripts": "src/**/*.js",
+    "assets": "public/**/*",
+    "targets": [
+      "node18-win-x64",
+      "node18-linux-x64",
+      "node18-macos-x64"
+    ],
+    "outputPath": "dist"
+  },
+  "devDependencies": {
+    "pkg": "^5.8.1"
+  }
+}

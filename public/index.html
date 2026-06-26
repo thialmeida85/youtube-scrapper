@@ -1,0 +1,148 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>YouTube Channel Intelligence</title>
+    <link rel="stylesheet" href="/styles.css" />
+  </head>
+  <body>
+    <main class="shell">
+      <section class="toolbar">
+        <div class="brand">
+          <p>YouTube Channel Intelligence</p>
+          <h1>Coletor de dados para IA</h1>
+        </div>
+
+        <form id="channel-form" class="search">
+          <label class="input-field">
+            <span>Canal</span>
+            <input
+              id="channel-url"
+              name="url"
+              type="text"
+              placeholder="https://youtube.com/@canal ou UC..."
+              autocomplete="off"
+              required
+            />
+          </label>
+
+          <label class="input-field">
+            <span>Modo</span>
+            <select id="collection-mode" name="mode">
+              <option value="latest">Ultimos videos</option>
+              <option value="yearly-sample">Amostra por ano</option>
+            </select>
+          </label>
+
+          <label class="input-field small">
+            <span>Limite</span>
+            <input id="video-limit" name="limit" type="number" min="1" max="500" value="25" />
+          </label>
+
+          <label class="input-field small yearly-only" hidden>
+            <span>Por ano</span>
+            <input id="videos-per-year" name="perYear" type="number" min="1" max="50" value="12" />
+          </label>
+
+          <label class="input-field small yearly-only" hidden>
+            <span>Ano inicial</span>
+            <input id="year-from" name="yearFrom" type="number" min="1900" max="2100" value="2015" />
+          </label>
+
+          <label class="input-field small yearly-only" hidden>
+            <span>Ano final</span>
+            <input id="year-to" name="yearTo" type="number" min="1900" max="2100" value="2026" />
+          </label>
+
+          <label class="input-field small yearly-only" hidden>
+            <span>Varredura</span>
+            <input id="max-scan" name="maxScan" type="number" min="50" max="20000" value="20000" />
+          </label>
+
+          <label class="toggle">
+            <input id="include-transcripts" type="checkbox" />
+            <span>Falas</span>
+          </label>
+
+          <button type="submit">Coletar</button>
+        </form>
+
+        <p id="status" class="status">Cole o endereco de um canal para comecar.</p>
+        <div id="progress" class="progress" hidden>
+          <div class="progress-track">
+            <div class="progress-bar"></div>
+          </div>
+          <ol id="progress-steps">
+            <li data-step="1">Verificando chave</li>
+            <li data-step="2">Buscando canal</li>
+            <li data-step="3">Listando e filtrando videos</li>
+            <li data-step="4">Preparando exportacao</li>
+          </ol>
+        </div>
+      </section>
+
+      <section id="dashboard" class="dashboard" hidden>
+        <section class="channel-head">
+          <img id="channel-avatar" alt="" />
+          <div>
+            <p id="channel-handle" class="muted"></p>
+            <h2 id="channel-title"></h2>
+            <p id="channel-description"></p>
+            <a id="channel-link" target="_blank" rel="noreferrer">Abrir canal</a>
+          </div>
+        </section>
+
+        <section class="metrics">
+          <div>
+            <span>Videos coletados</span>
+            <strong id="metric-videos"></strong>
+          </div>
+          <div>
+            <span>Views no recorte</span>
+            <strong id="metric-views"></strong>
+          </div>
+          <div>
+            <span>Likes no recorte</span>
+            <strong id="metric-likes"></strong>
+          </div>
+          <div>
+            <span>Inscritos</span>
+            <strong id="metric-subscribers"></strong>
+          </div>
+        </section>
+
+        <section class="exports">
+          <button id="export-jsonl" type="button">JSONL</button>
+          <button id="export-json" type="button">JSON</button>
+          <button id="export-csv" type="button">CSV</button>
+          <button id="export-md" type="button">Markdown</button>
+          <button id="export-doc" type="button">DOC</button>
+          <button id="print-pdf" type="button">PDF</button>
+        </section>
+
+        <section class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Video</th>
+                <th>Publicado</th>
+                <th>Views</th>
+                <th>Likes</th>
+                <th>Comentarios</th>
+                <th>Falas</th>
+                <th>Alertas</th>
+                <th>Resumo</th>
+              </tr>
+            </thead>
+            <tbody id="video-rows"></tbody>
+          </table>
+        </section>
+      </section>
+
+      <section id="print-report" class="print-report" hidden></section>
+    </main>
+
+    <script src="/app.js" type="module"></script>
+  </body>
+</html>
