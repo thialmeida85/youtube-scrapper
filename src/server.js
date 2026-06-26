@@ -74,6 +74,18 @@ async function handleRequest(request, response) {
     }
 
     if (request.method === "GET") {
+      if (url.pathname === "/" || url.pathname === "/index.html") {
+        return serveStatic("/index.html", response);
+      }
+
+      if (url.pathname === "/app.js") {
+        return serveStatic("/app.js", response);
+      }
+
+      if (url.pathname === "/styles.css") {
+        return serveStatic("/styles.css", response);
+      }
+
       return serveStatic(url.pathname, response);
     }
 

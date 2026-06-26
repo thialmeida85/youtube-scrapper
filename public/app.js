@@ -71,8 +71,7 @@ form.addEventListener("submit", async (event) => {
 
   try {
     setProgressStep(1);
-    const statusResponse = await fetch("/api/status");
-    const status = await statusResponse.json();
+    const status = await fetchJson("/api/status");
     if (!status.hasYouTubeApiKey) {
       throw new Error(
         "Chave da YouTube API nao encontrada. Coloque o arquivo .env na pasta do .exe ou na pasta acima dele.",
@@ -99,8 +98,7 @@ form.addEventListener("submit", async (event) => {
       maxAudioTranscriptions,
     });
     const endpoint = `/api/channel?${params}`;
-    const response = await fetch(endpoint);
-    const payload = await response.json();
+    const { response, payload } = await fetchJsonWithResponse(endpoint);
 
     if (!response.ok) {
       throw new Error(payload.error || "Falha ao analisar canal.");
@@ -806,6 +804,25 @@ function exportFile(filename, content, type) {
   link.download = filename;
   link.click();
   URL.revokeObjectURL(url);
+}
+
+async function fetchJson(url) {
+  return (await fetchJsonWithResponse(url)).payload;
+}
+
+async function fetchJsonWithResponse(url) {
+  const response = await fetch(url);
+  const text = await response.text();
+  let payload = null;
+
+  try {
+    payload = text ? JSON.parse(text) : {};
+  } catch {
+    const preview = text.replace(/\s+/g, " ").trim().slice(0, 120) || response.statusText;
+    throw new Error(`A rota ${url} respondeu ${response.status} como texto, nao JSON: ${preview}`);
+  }
+
+  return { response, payload };
 }
 
 function setStatus(message) {
