@@ -1,4 +1,7 @@
 .env
+cookies.txt
+*cookies*.txt
+*cookie*.txt
 node_modules/
 dist/
 npm-debug.log*
